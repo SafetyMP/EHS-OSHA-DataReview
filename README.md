@@ -377,7 +377,7 @@ Contributions welcome! Please open an issue or submit a PR.
 
 Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
-Copyright 2024 Sage Hart
+Copyright 2025 Sage Hart
 
 ## Author
 
