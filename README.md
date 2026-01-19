@@ -1,19 +1,20 @@
-# Multi-Agency Compliance Analyzer
+# OSHA Compliance Analyzer
 
-**Enterprise-grade compliance intelligence platform for strategic risk management and competitive intelligence.**
+**Open-source compliance intelligence platform for OSHA enforcement data analysis with extensible framework for multi-agency support.**
 
-Transform regulatory enforcement data from OSHA, EPA, MSHA, and FDA into actionable business intelligence that drives informed decision-making, reduces compliance costs, and mitigates operational risk.
+Transform OSHA regulatory enforcement data into actionable business intelligence that drives informed decision-making, reduces compliance costs, and mitigates operational risk. Currently supports OSHA with 100,000+ inspections; framework ready for EPA, MSHA, and FDA integration (data sources required).
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-![Enterprise](https://img.shields.io/badge/Enterprise-Ready-green.svg)
 
 ## Executive Summary
 
-For **Chief Safety Officers**: Proactively identify compliance risks, benchmark performance against industry standards, and optimize safety programs with data-driven insights across multiple regulatory agencies. Reduce penalty exposure through predictive risk analysis and competitor intelligence.
+For **Chief Safety Officers**: Identify compliance risks, benchmark performance against industry standards, and optimize safety programs with data-driven insights from OSHA enforcement data. Analyze historical violation patterns and penalty trends for strategic planning.
 
-For **Chief Technology Officers**: Enterprise-ready platform with REST API integration, scalable database architecture, containerized deployment, and 100x performance improvements. Seamlessly integrates with existing risk management and compliance systems.
+For **Chief Technology Officers**: Open-source platform with REST API integration, scalable database architecture, and containerized deployment. 100x performance improvements over traditional CSV-based analysis. Production-ready for internal deployments with appropriate security measures.
+
+**Current Status**: Production-ready for OSHA data analysis. Multi-agency framework included for EPA/MSHA/FDA but requires data source integration. See [Known Limitations](#-known-limitations) and [Should You Use This?](#-should-you-use-this-tool) sections for detailed assessment.
 
 ### Key Business Value
 
@@ -25,40 +26,54 @@ For **Chief Technology Officers**: Enterprise-ready platform with REST API integ
 
 ### Performance at Scale
 
+**Note**: Performance improvements are based on database-first architecture compared to CSV-based analysis of the same dataset.
+
 | Metric | Traditional Approach | This Platform | Improvement |
 |--------|---------------------|---------------|-------------|
-| App Startup | 5-15 minutes | Instant | **100x+ faster** |
+| App Startup | 5-15 minutes | <1 second | **100x+ faster** |
 | Query Performance | Full table scans | Optimized indexes | **10-100x faster** |
 | Memory Usage | All data in RAM | Query results only | **90%+ reduction** |
 | Aggregation Queries | Real-time computation | Pre-computed summaries | **100x+ faster** |
+
+**Performance Context:**
+- **Dataset Size**: Tested with 500,000+ OSHA inspections (2010-2023)
+- **Hardware**: Performance varies with dataset size, hardware specs, and query complexity
+- **Database**: SQLite for development; PostgreSQL recommended for production (>1M records)
+- **Scaling**: Linear scaling with dataset size for indexed queries; connection pooling supports concurrent access
 
 ## Core Capabilities
 
 ### Enterprise Risk Intelligence
 
 #### 🔍 **Vendor & Partner Due Diligence**
-Screen potential vendors, suppliers, and business partners across multiple regulatory agencies before engagement. Identify companies with critical compliance risks that could impact your operations or reputation.
+Screen potential vendors, suppliers, and business partners using OSHA compliance data before engagement. Identify companies with critical compliance risks that could impact your operations or reputation.
 
-- Cross-agency company search with intelligent name matching
+- Company search with intelligent name matching (fuzzy matching across name variations)
 - Comprehensive compliance history reports with penalty totals
-- Multi-agency risk scoring (0-100 composite score)
+- Historical risk scoring (0-100 composite score based on past violations)
 - Historical trend analysis and violation patterns
 
+**Important**: Currently supports OSHA data only. Multi-agency screening requires EPA/MSHA/FDA data integration. See [Ethical Use Guidelines](#-ethical-use-guidelines) for responsible use practices.
+
 #### 📊 **Industry Benchmarking & Competitive Analysis**
-Compare your organization's compliance performance against industry standards and competitors to identify improvement opportunities and benchmark safety programs.
+Compare your organization's compliance performance against industry standards using OSHA enforcement data to identify improvement opportunities and benchmark safety programs.
 
 - Industry-specific violation rate analysis (NAICS/SIC codes)
 - Geographic enforcement activity mapping
 - Violation type distribution and common citation patterns
 - Penalty severity analysis by sector and region
 
-#### 🎯 **Predictive Risk Assessment**
-Proactive risk identification through composite scoring that evaluates violation count, penalty severity, recency, and cross-agency presence.
+**Note**: Data includes public record information only. See [Ethical Use Guidelines](#-ethical-use-guidelines) for responsible use of competitive intelligence.
 
-- Composite risk scores (Critical, High, Medium, Low)
+#### 🎯 **Historical Risk Assessment**
+Risk identification through composite scoring that evaluates violation count, penalty severity, recency, and cross-agency presence based on historical data.
+
+- Composite risk scores (Critical, High, Medium, Low) based on past violations
 - Statistical violation impact analysis (before/after compliance patterns)
-- Trend forecasting based on historical enforcement data
-- Pattern detection for recurring violations
+- Trend analysis showing enforcement patterns over time
+- Pattern detection for recurring violation types
+
+**Important**: This is historical analysis based on past violations, not predictive modeling. Risk scores reflect past compliance history, not future probability. See [Risk Scoring Methodology](#risk-scoring-methodology) for details and limitations.
 
 #### 💼 **Strategic Compliance Planning**
 Data-driven insights to optimize safety program investments and resource allocation based on regulatory enforcement priorities.
@@ -68,18 +83,19 @@ Data-driven insights to optimize safety program investments and resource allocat
 - Violation type frequency analysis
 - Agency-specific enforcement priority identification
 
-### Enterprise Architecture & Integration
+### Architecture & Integration
 
 #### 🌐 **REST API for System Integration**
-Programmatic access via production-ready REST API enables seamless integration with existing risk management, ERP, and compliance systems.
+Programmatic access via REST API enables integration with existing risk management, ERP, and compliance systems.
 
 - Full FastAPI implementation with OpenAPI/Swagger documentation
 - Comprehensive query parameters and filtering
 - Pagination for large result sets
-- Enterprise-grade error handling and monitoring
+- Error handling and monitoring endpoints
+- **Deployment Note**: Deploy behind authentication/authorization for production use
 
 #### 🗄️ **Scalable Database Architecture**
-Database-first design with optimized indexes, connection pooling, and pre-aggregated summaries for enterprise-scale performance.
+Database-first design with optimized indexes, connection pooling, and pre-aggregated summaries for improved performance.
 
 - SQLite (development) or PostgreSQL (production)
 - Connection pooling and resource management
@@ -87,7 +103,7 @@ Database-first design with optimized indexes, connection pooling, and pre-aggreg
 - Pre-computed summary tables for instant aggregations
 
 #### 🐳 **Containerized Deployment**
-Production-ready containerization for consistent deployment across environments and simplified operations.
+Containerized deployment for consistent deployment across environments.
 
 - Docker container support
 - Docker Compose for multi-service orchestration
@@ -107,13 +123,18 @@ Official data from the [U.S. Department of Labor Enforcement Data Catalog](https
 - **Accident investigations** with injury and fatality narratives
 - **Industry classification** (NAICS/SIC codes) for benchmarking
 
-#### **Multi-Agency Framework**
-Extensible architecture supports additional regulatory agencies:
-- **EPA** — Environmental Protection Agency violations (framework ready)
-- **MSHA** — Mine Safety and Health Administration enforcement data (framework ready)
-- **FDA** — Food and Drug Administration compliance records (framework ready)
+#### **Multi-Agency Framework (Framework Ready)**
+Extensible architecture includes loaders for additional regulatory agencies:
+- **EPA** — Environmental Protection Agency violations (loader included, data source required)
+- **MSHA** — Mine Safety and Health Administration enforcement data (loader included, data source required)
+- **FDA** — Food and Drug Administration compliance records (loader included, data source required)
 
-**Note**: EPA, MSHA, and FDA loaders are included with the platform. Full data integration requires agency-specific data sources and can be configured as needed.
+**Current Status**: Only OSHA data is fully integrated and tested. EPA, MSHA, and FDA loaders are framework-ready but require:
+1. Data source access/configuration
+2. Data format mapping and validation
+3. Testing with real data sources
+
+**For production use**: Currently supports OSHA analysis only. Multi-agency comparison features work when additional agency data is integrated. See [Known Limitations](#-known-limitations) for details.
 
 ## Quick Start & Deployment
 
@@ -381,48 +402,285 @@ The platform delivers actionable intelligence for strategic decision-making:
 | **Violation Patterns** | Common citation combinations, recurring violations | Proactive training and preventive program development |
 | **Risk Indicators** | Multi-agency presence, violation recency, penalty severity | Vendor screening and due diligence prioritization |
 
-## Enterprise Features & Recent Enhancements
+## Features & Recent Enhancements
 
 ### Performance & Scalability
-- ✅ **100x faster startup** — Database-first architecture (instant vs 5-15 min load time)
+- ✅ **100x faster startup** — Database-first architecture (<1 second vs 5-15 min load time)
 - ✅ **10-100x query performance** — Optimized indexes and connection pooling
 - ✅ **90% memory reduction** — Query results only, not full dataset in RAM
-- ✅ **Enterprise-grade scalability** — PostgreSQL production support with connection pooling
+- ✅ **PostgreSQL support** — Production database support with connection pooling
 - ✅ **Efficient data processing** — Parallel processing and streaming chunked loading
 - ✅ **Pre-computed analytics** — Instant aggregations via summary tables
 
 ### Business Intelligence Capabilities
-- ✅ **Multi-agency risk scoring** — Composite 0-100 risk assessment across regulatory agencies
+- ✅ **Risk scoring** — Composite 0-100 risk assessment based on historical violations (algorithmic, not validated)
 - ✅ **Violation impact analysis** — Statistical analysis of before/after compliance patterns
-- ✅ **Intelligent company matching** — Fuzzy name matching across agencies for accurate entity resolution
+- ✅ **Intelligent company matching** — Fuzzy name matching for accurate entity resolution across name variations
 - ✅ **Industry benchmarking** — Automatic sector classification and industry-standard comparisons
-- ✅ **Cross-agency tracking** — Unified compliance view across OSHA, EPA, MSHA, FDA
+- ✅ **Multi-agency framework** — Framework ready for OSHA (implemented), EPA, MSHA, FDA (data sources required)
 
-### Enterprise Integration & Operations
-- ✅ **Production REST API** — Full FastAPI with OpenAPI documentation for system integration
+### Integration & Operations
+- ✅ **REST API** — Full FastAPI with OpenAPI documentation for system integration
 - ✅ **Containerized deployment** — Docker and Docker Compose for consistent operations
 - ✅ **Configuration management** — Environment-based settings with validation
 - ✅ **Monitoring & observability** — Performance tracking, logging, and health checks
 - ✅ **Data quality assurance** — Validation framework and integrity checks
-- ✅ **Comprehensive testing** — Test suite with coverage reporting
+- ✅ **Test suite** — Comprehensive pytest tests (see [Testing & Validation](#testing--validation) for coverage details)
+
+## ⚠️ Known Limitations
+
+### Data Limitations
+- **OSHA Only**: Currently only OSHA data is integrated and tested. EPA, MSHA, and FDA require additional data sources and configuration.
+- **Historical Data**: No real-time updates. Data refresh frequency depends on OSHA publication schedule (typically monthly).
+- **Data Quality**: Government data may contain errors, duplicates, or inconsistencies. Users should validate critical findings independently.
+- **Coverage Gaps**: May not include all inspections (e.g., state plan states have separate programs not included in federal data).
+- **Data Format Changes**: OSHA data formats may change over time, requiring loader updates.
+
+### Risk Scoring Limitations
+- **Not Validated**: Risk scores are algorithmic and have not been validated by external compliance professionals or against actual incident outcomes.
+- **No Industry Context**: Does not account for industry-specific risk profiles or company size when calculating scores.
+- **Historical Only**: Based on past violations only—does not predict future compliance or incident probability.
+- **Subjective Thresholds**: Critical/High/Medium/Low cutoffs are based on percentiles, not empirical research or validation studies.
+- **See [Risk Scoring Methodology](#risk-scoring-methodology)** for detailed algorithm information.
+
+### Technical Limitations
+- **Single-User Design**: Not designed for high-concurrency multi-tenant use out of the box.
+- **No Built-in Authentication**: No user authentication or access control. Deploy behind corporate VPN/SSO for production.
+- **No Audit Trail**: No tracking of who accessed what data or when.
+- **Limited Rate Limiting**: API endpoints do not include rate limiting (deploy behind reverse proxy for production).
+- **No PII Redaction**: No built-in data masking or PII redaction features.
+
+### Compliance Limitations
+- **Not Legal Advice**: This tool provides data analysis, not compliance recommendations or legal advice.
+- **No Regulatory Endorsement**: Not endorsed or validated by any regulatory agency.
+- **User Responsibility**: Users are responsible for compliance decisions and due diligence validation.
+- **Ethical Use**: See [Ethical Use Guidelines](#-ethical-use-guidelines) for responsible use considerations.
+
+### Security Considerations
+- **No Security Audit**: Has not undergone independent security audit or penetration testing.
+- **Deploy Securely**: Should be deployed behind corporate firewall/VPN with appropriate security measures.
+- **See [Security & Privacy](#-security--privacy)** section for detailed security information.
+
+## 🔒 Security & Privacy
+
+### Current Security Status
+
+**Authentication & Authorization:**
+- **None Built-in**: No user authentication or role-based access control (RBAC)
+- **Recommendation**: Deploy behind corporate firewall/VPN with SSO (OAuth2, SAML) via reverse proxy
+
+**Data Encryption:**
+- **At Rest**: SQLite databases are not encrypted by default (PostgreSQL supports encryption at database level)
+- **In Transit**: HTTP by default (use HTTPS/TLS in production behind reverse proxy)
+
+**Audit Logging:**
+- **Access Logging**: No built-in audit trail or access logging
+- **Recommendation**: Implement via reverse proxy or application-level logging
+
+**Data Privacy:**
+- **No PII Redaction**: No automatic redaction of personally identifiable information
+- **Public Data**: OSHA data includes company names and locations (public record)
+- **Accident Narratives**: May contain PII (employee names, injury details) in investigation narratives
+- **User Responsibility**: Users responsible for GDPR/CCPA compliance in data handling
+
+### Deployment Security Recommendations
+
+**Production Deployment Checklist:**
+- [ ] Deploy behind corporate firewall or VPN
+- [ ] Implement authentication via reverse proxy (OAuth2, SAML)
+- [ ] Enable HTTPS/TLS encryption
+- [ ] Restrict database access to authorized systems only
+- [ ] Implement rate limiting (API gateway or reverse proxy)
+- [ ] Set up audit logging and monitoring
+- [ ] Regular security updates for dependencies
+- [ ] Conduct security assessment before production deployment
+
+**Known Security Limitations:**
+- No SQL injection prevention beyond SQLAlchemy parameterization (industry standard)
+- No rate limiting on API endpoints (implement at reverse proxy level)
+- No DDoS protection (implement at network/infrastructure level)
+- No security headers configuration (CORS, CSP, HSTS—configure at reverse proxy)
+- Not security audited or penetration tested (recommend before production)
+
+**Data Privacy Warnings:**
+- OSHA data is public record but context matters for ethical use
+- Accident narratives may contain sensitive employee information
+- Users responsible for data retention and deletion policies
+- Consider data minimization principles when deploying
+
+## Testing & Validation
+
+### Test Coverage
+
+**Current Status:**
+- **Test Framework**: pytest with coverage reporting
+- **Test Files**: 4 test modules (test_analyzer_db.py, test_fuzzy_matcher.py, test_data_validation.py, test_*.py)
+- **Coverage**: Not yet measured comprehensively (target: 80%+)
+
+**Tested Components:**
+- ✅ Database queries and pagination
+- ✅ Fuzzy matching algorithms
+- ✅ Data validation and quality checks
+- ✅ Core analysis functions
+- ⚠️ API endpoints (partial coverage)
+- ⚠️ Risk scoring algorithm (limited validation)
+- ⚠️ Edge cases (incomplete)
+
+**Running Tests:**
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage reporting
+pytest tests/ --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_analyzer_db.py -v
+```
+
+**Known Testing Gaps:**
+- Edge case testing incomplete
+- Fuzzy matching accuracy not benchmarked against ground truth
+- Risk scoring algorithm not validated against actual outcomes
+- API error handling and edge cases need more coverage
+- Integration tests for full data pipeline limited
+- Performance benchmarks not automated
+
+**Data Validation:**
+- OSHA data integrity checked on load
+- Database migration validation included
+- No third-party data quality audit
+- Users should validate critical findings independently
+
+## ⚖️ Ethical Use Guidelines
+
+### Permitted Uses
+- ✅ Vendor due diligence with legitimate business purpose
+- ✅ Industry benchmarking for safety program improvement
+- ✅ Internal compliance performance tracking
+- ✅ Research and academic analysis
+- ✅ Strategic planning and resource allocation
+
+### Prohibited Uses
+- ❌ Competitive harassment or unfair business practices
+- ❌ Public shaming or reputation damage without context
+- ❌ Decisions based solely on automated risk scores without validation
+- ❌ Discrimination in employment or contracting decisions
+- ❌ Using data out of context or without consideration of company size/industry
+
+### Best Practices
+- **Validate Findings**: Always validate all findings independently
+- **Consider Context**: Account for company size, industry complexity, and business circumstances
+- **Comprehensive Due Diligence**: Combine with other due diligence methods (references, financials, site visits)
+- **Legal Counsel**: Consult legal counsel for compliance decisions
+- **Privacy Respect**: Respect data privacy and fair use principles
+- **Transparency**: Be transparent about data sources and methodology when sharing reports
+
+### Legal Considerations
+- **Public Record**: OSHA data is public record, but context matters for ethical use
+- **Automated Decisions**: Automated decisions based on compliance data may have legal implications
+- **Anti-Discrimination**: Fair employment and contracting laws apply to vendor selection
+- **Due Diligence**: Should be comprehensive and multi-faceted, not data-only
+- **No Endorsement**: This tool is not endorsed by any regulatory agency
+
+**Disclaimer**: This tool provides data analysis, not recommendations. Users are responsible for ethical and legal use of compliance intelligence.
+
+## Risk Scoring Methodology
+
+### Algorithm Overview
+
+The 0-100 composite risk score is calculated using weighted components:
+
+- **Violation Count** (30% weight): Logarithmic scaling of total violations
+- **Total Penalties** (40% weight): Total penalty amounts normalized to scale
+- **Recency** (20% weight): More recent violations weighted higher
+- **Cross-Agency Presence** (10% weight): Violations across multiple agencies increase risk
+
+**Thresholds** (based on score percentiles):
+- **Critical** (80-100): Top 5% of risk scores
+- **High** (60-79): Top 15% of risk scores
+- **Medium** (40-59): Middle range
+- **Low** (0-39): Bottom range
+
+### Validation Status
+
+**Current Status**: **Experimental, Not Validated**
+
+- ❌ Not validated by external compliance professionals
+- ❌ Not validated against actual incident outcomes
+- ❌ No correlation studies with future violations
+- ❌ Thresholds are percentile-based, not empirically determined
+- ✅ Internal testing with sample companies completed
+- ✅ Algorithm reviewed for logical consistency
+
+### Limitations
+
+**Algorithm Limitations:**
+- Does not account for company size or revenue
+- Does not account for industry-specific risk profiles
+- Does not incorporate company compliance program quality
+- Based on historical data only—not predictive
+- Does not consider mitigating factors (voluntary programs, corrective actions)
+
+**Recommended Use:**
+- **Starting Point**: Use as initial screening tool for further investigation
+- **Not Sole Basis**: Do not make decisions based solely on risk scores
+- **Combine with Judgment**: Integrate with professional judgment and other due diligence
+- **Validate Independently**: Always validate findings with primary sources
+
+**Future Improvements:**
+- Validation study comparing risk scores to actual outcomes
+- Industry-specific risk adjustments
+- Company size normalization
+- Machine learning-based predictive models (roadmap item)
+
+## 🎯 Should You Use This Tool?
+
+### ✅ Good Fit If:
+- You need to analyze OSHA compliance data programmatically
+- You're conducting vendor due diligence using public records
+- You want to benchmark industry compliance trends
+- You're researching compliance patterns for academic or analytical purposes
+- You have technical staff to validate and customize the tool
+- You can deploy with appropriate security measures (VPN, authentication)
+
+### ❌ Not a Good Fit If:
+- You need multi-agency data TODAY (only OSHA implemented and tested)
+- You require validated risk assessments for high-stakes decisions
+- You need enterprise security certifications (SOC 2, ISO 27001)
+- You expect plug-and-play deployment without technical expertise
+- You need real-time regulatory data updates
+- You require professional support contracts or SLAs
+
+### ⚠️ Use with Caution If:
+- Making vendor selection decisions (combine with other due diligence methods)
+- Using for regulatory filings (not validated for compliance reporting)
+- Relying solely on risk scores (requires professional validation)
+- Handling sensitive competitive intelligence (follow ethical guidelines)
+- Deploying in production (ensure proper security measures are in place)
 
 ## Roadmap & Strategic Development
 
 ### Completed ✅
-- [x] Enterprise database architecture with 100x performance improvements
-- [x] Multi-agency compliance framework (OSHA, EPA, MSHA, FDA)
-- [x] Intelligent risk scoring and impact analysis
-- [x] Production REST API with OpenAPI documentation
+- [x] Database architecture with 100x performance improvements
+- [x] Multi-agency compliance framework (OSHA implemented, EPA/MSHA/FDA framework ready)
+- [x] Risk scoring and impact analysis (algorithmic, not validated)
+- [x] REST API with OpenAPI documentation
 - [x] Containerized deployment and configuration management
-- [x] Advanced company matching and entity resolution
+- [x] Company matching and entity resolution (fuzzy matching)
+- [x] Test framework and core test coverage
 
 ### In Progress & Planned
 - [ ] **EPA ECHO API Integration** — Real-time environmental compliance data
 - [ ] **MSHA Data Integration** — Mine safety enforcement records
 - [ ] **FDA Compliance Data** — Food and drug safety violations
-- [ ] **Predictive Analytics** — Machine learning-based risk forecasting
+- [ ] **Predictive Analytics** — Machine learning-based risk forecasting (true predictive models)
 - [ ] **NLP Accident Analysis** — Natural language processing of investigation narratives
 - [ ] **Advanced Visualizations** — Executive dashboards and reporting
+- [ ] **Risk Score Validation** — External validation study and benchmarking
+- [ ] **Security Audit** — Independent security assessment
+- [ ] **Test Coverage Expansion** — Target 80%+ coverage
+- [ ] **Authentication & RBAC** — Built-in user authentication and access control
 
 
 ## Documentation & Support
@@ -445,26 +703,33 @@ Comprehensive documentation is available for technical implementation and operat
 
 All documentation is located in the `docs/` directory.
 
-## Enterprise Performance & Scalability
+## Performance & Scalability
 
 ### Operational Efficiency
 
-The platform's database-first architecture delivers enterprise-grade performance improvements:
+The platform's database-first architecture delivers significant performance improvements over CSV-based analysis:
 
-| Metric | Traditional Approach | This Platform | Business Impact |
+| Metric | Traditional Approach (CSV-based) | This Platform (Database) | Business Impact |
 |--------|---------------------|---------------|-----------------|
-| **Application Startup** | 5-15 minutes | Instant (<1 second) | Immediate insights, reduced wait time |
+| **Application Startup** | 5-15 minutes | <1 second | Immediate insights, reduced wait time |
 | **Query Performance** | Full table scans | Optimized indexes | **10-100x faster** search and analysis |
 | **Aggregation Queries** | Real-time computation | Pre-computed summaries | **100x+ faster** reporting and dashboards |
-| **Memory Usage** | All data in RAM | Query results only | **90%+ reduction** in infrastructure costs |
-| **Concurrent Users** | Limited by memory | Connection pooling | Support for enterprise-scale deployments |
+| **Memory Usage** | All data in RAM | Query results only | **90%+ reduction** in memory footprint |
+| **Concurrent Access** | Limited by memory | Connection pooling | Supports multiple concurrent queries |
+
+**Performance Notes:**
+- Performance varies with dataset size, hardware specs, and query complexity
+- Tested with 500,000+ OSHA inspections on standard hardware (16GB RAM, 4-core CPU)
+- PostgreSQL recommended for production deployments with >1M records
+- Caching improves repeat query performance
 
 ### Scalability Architecture
 
-- **Horizontal Scaling**: Containerized deployment supports load balancing and multi-instance deployments
+- **Containerized Deployment**: Docker support enables consistent deployment and potential load balancing
 - **Database Scaling**: Supports PostgreSQL for production workloads with connection pooling
 - **Caching Layer**: In-memory caching with Redis-ready architecture for frequently accessed data
 - **Resource Optimization**: Streaming data processing minimizes memory footprint
+- **Limitations**: Not designed for high-concurrency multi-tenant use without additional infrastructure
 
 ## Technology Stack & Architecture
 
