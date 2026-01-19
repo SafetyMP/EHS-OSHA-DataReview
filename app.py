@@ -48,8 +48,12 @@ st.markdown("""
 
 
 @st.cache_resource
-def load_analyzer():
-    """Load OSHA analyzer with caching - uses database backend for performance."""
+def load_analyzer(_cache_version: str = "v1.1"):
+    """Load OSHA analyzer with caching - uses database backend for performance.
+    
+    Args:
+        _cache_version: Version string to force cache refresh when code changes
+    """
     data_dir = Path(__file__).parent / "data"
     
     # Check if database exists, use it if available
@@ -243,7 +247,7 @@ def main():
         
         # Trend chart
         st.subheader("Inspection Trends Over Time")
-        trend_data = analyzer.trend_analysis("violations")
+        trend_data = analyzer.trend_analysis("violations", year=year_filter, state=state_filter)
         if not trend_data.empty:
             trend_data = trend_data[trend_data["year"] >= 2000]
             fig = px.line(

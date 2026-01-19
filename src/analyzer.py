@@ -4,7 +4,7 @@ Analysis and visualization functions for OSHA enforcement data.
 """
 
 import pandas as pd
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from .data_loader import load_inspections, load_violations, load_accidents
 
@@ -169,14 +169,25 @@ class OSHAAnalyzer:
         
         return summary.sort_values("total_penalty", ascending=False)
     
-    def trend_analysis(self, metric: str = "inspections") -> pd.DataFrame:
-        """Analyze trends over time."""
+    def trend_analysis(self, metric: str = "inspections", year: Optional[int] = None, state: Optional[str] = None) -> pd.DataFrame:
+        """Analyze trends over time.
+        
+        Args:
+            metric: Type of analysis ("violations", "inspections", or "penalties")
+            year: Optional year filter (applied as exact match)
+            state: Optional state filter (applied to site_state)
+        """
         if metric == "inspections":
             if self.inspections.empty:
                 return pd.DataFrame()
             df = self.inspections.copy()
             if "year" not in df.columns:
                 return pd.DataFrame()
+            # Apply filters
+            if state and "site_state" in df.columns:
+                df = df[df["site_state"] == state]
+            if year:
+                df = df[df["year"] == year]
             counts = df["year"].value_counts().sort_index().reset_index()
             counts.columns = ["year", "count"]
         
@@ -186,6 +197,11 @@ class OSHAAnalyzer:
             df = self.violations.copy()
             if "year" not in df.columns:
                 return pd.DataFrame()
+            # Apply filters
+            if state and "site_state" in df.columns:
+                df = df[df["site_state"] == state]
+            if year:
+                df = df[df["year"] == year]
             counts = df["year"].value_counts().sort_index().reset_index()
             counts.columns = ["year", "count"]
         
@@ -195,6 +211,11 @@ class OSHAAnalyzer:
             df = self.violations.copy()
             if "year" not in df.columns or "current_penalty" not in df.columns:
                 return pd.DataFrame()
+            # Apply filters
+            if state and "site_state" in df.columns:
+                df = df[df["site_state"] == state]
+            if year:
+                df = df[df["year"] == year]
             counts = df.groupby("year")["current_penalty"].sum().reset_index()
             counts.columns = ["year", "total_penalty"]
         

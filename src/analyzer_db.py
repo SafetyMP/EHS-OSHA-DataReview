@@ -295,6 +295,7 @@ class OSHAAnalyzerDB:
                     query_unknown = query_unknown.filter(Violation.year == year)
                 
                 # Get company name normalized for better matching
+                # Limit to top 1000 companies to avoid performance issues
                 query_unknown_with_norm = session.query(
                     Violation.company_name,
                     Violation.company_name_normalized,
@@ -308,27 +309,41 @@ class OSHAAnalyzerDB:
                 if year:
                     query_unknown_with_norm = query_unknown_with_norm.filter(Violation.year == year)
                 
+                # Order by violation count and limit to prevent performance issues
                 unknown_data = query_unknown_with_norm.group_by(
                     Violation.company_name, Violation.company_name_normalized
-                ).all()
+                ).order_by(func.count(Violation.id).desc()).limit(1000).all()
                 
                 # Classify each company
                 classified = {}
                 total_classified = 0
-                for company_name, company_name_normalized, count, avg_penalty in unknown_data:
-                    sector = self._classify_unknown_naics(
-                        company_name, 
-                        company_name_normalized, 
-                        session=session
-                    )
-                    if sector:
-                        if sector not in classified:
-                            classified[sector] = {'count': 0, 'penalty_sum': 0, 'penalty_count': 0}
-                        classified[sector]['count'] += count
-                        total_classified += count
-                        if avg_penalty:
-                            classified[sector]['penalty_sum'] += avg_penalty * count
-                            classified[sector]['penalty_count'] += count
+                for row in unknown_data:
+                    # Access Row object attributes (SQLAlchemy returns Row objects)
+                    company_name = getattr(row, 'company_name', None)
+                    company_name_normalized = getattr(row, 'company_name_normalized', None)
+                    count = getattr(row, 'violation_count', 0) or 0
+                    avg_penalty = getattr(row, 'avg_penalty', None)
+                    
+                    if not company_name or count == 0:
+                        continue
+                    
+                    try:
+                        sector = self._classify_unknown_naics(
+                            company_name, 
+                            company_name_normalized, 
+                            session=session
+                        )
+                        if sector:
+                            if sector not in classified:
+                                classified[sector] = {'count': 0, 'penalty_sum': 0, 'penalty_count': 0}
+                            classified[sector]['count'] += count
+                            total_classified += count
+                            if avg_penalty:
+                                classified[sector]['penalty_sum'] += avg_penalty * count
+                                classified[sector]['penalty_count'] += count
+                    except Exception:
+                        # Skip rows that cause errors during classification
+                        continue
                 
                 # Convert classified to results format
                 for sector, data in classified.items():
@@ -336,12 +351,21 @@ class OSHAAnalyzerDB:
                     unknown_results.append((sector, data['count'], avg_penalty))
                 
                 # Calculate remaining unclassified
-                total_unknown = sum(count for _, count, _ in unknown_data)
+                # unknown_data returns Row objects with attributes: company_name, company_name_normalized, violation_count, avg_penalty
+                total_unknown = sum(getattr(row, 'violation_count', 0) or 0 for row in unknown_data)
                 unclassified_count = total_unknown - total_classified
             
             # Combine known and classified unknown results
             all_results = {}
-            for sector, count, avg_penalty in known_results:
+            for row in known_results:
+                # Access Row object attributes (SQLAlchemy returns Row objects)
+                sector = getattr(row, 'naics_sector', None)
+                count = getattr(row, 'violation_count', 0) or 0
+                avg_penalty = getattr(row, 'avg_penalty', None)
+                
+                if not sector or count == 0:
+                    continue
+                
                 if sector not in all_results:
                     all_results[sector] = {'count': 0, 'penalty_sum': 0, 'penalty_count': 0}
                 all_results[sector]['count'] += count
@@ -446,49 +470,61 @@ class OSHAAnalyzerDB:
         finally:
             session.close()
     
-    def trend_analysis(self, metric: str = "violations") -> pd.DataFrame:
-        """Analyze trends over time using database query."""
+    def trend_analysis(self, metric: str = "violations", year: Optional[int] = None, state: Optional[str] = None) -> pd.DataFrame:
+        """Analyze trends over time using database query.
+        
+        Args:
+            metric: Type of analysis ("violations", "inspections", or "penalties")
+            year: Optional year filter (ignored for trends - trends show multiple years)
+            state: Optional state filter (applied to site_state)
+        """
         session = self.db.get_session()
         try:
             if metric == "violations":
-                # Use pd.read_sql to avoid SQLAlchemy query evaluation issues
-                sql = """
-                    SELECT year, COUNT(*) as count
-                    FROM violations
-                    WHERE agency = 'OSHA'
-                      AND year IS NOT NULL
-                      AND year >= 2000
-                    GROUP BY year
-                    ORDER BY year
-                """
-                df = pd.read_sql(sql, session.bind)
+                query = session.query(
+                    Violation.year,
+                    func.count(Violation.id).label('count')
+                ).filter(
+                    Violation.agency == "OSHA",
+                    Violation.year.isnot(None),
+                    Violation.year >= 2000
+                )
+                if state:
+                    query = query.filter(Violation.site_state == state.upper())
+                
+                query = query.group_by(Violation.year).order_by(Violation.year)
+                df = pd.read_sql(query.statement, session.bind)
                 df.columns = ['year', 'count']
                 
             elif metric == "inspections":
-                # Use pd.read_sql to avoid SQLAlchemy query evaluation issues
-                sql = """
-                    SELECT year, COUNT(*) as count
-                    FROM inspections
-                    WHERE year IS NOT NULL
-                      AND year >= 2000
-                    GROUP BY year
-                    ORDER BY year
-                """
-                df = pd.read_sql(sql, session.bind)
+                query = session.query(
+                    Inspection.year,
+                    func.count(Inspection.id).label('count')
+                ).filter(
+                    Inspection.year.isnot(None),
+                    Inspection.year >= 2000
+                )
+                if state:
+                    query = query.filter(Inspection.site_state == state.upper())
+                
+                query = query.group_by(Inspection.year).order_by(Inspection.year)
+                df = pd.read_sql(query.statement, session.bind)
                 df.columns = ['year', 'count']
                 
             elif metric == "penalties":
-                # Use pd.read_sql to avoid SQLAlchemy query evaluation issues
-                sql = """
-                    SELECT year, COALESCE(SUM(current_penalty), 0) as total_penalty
-                    FROM violations
-                    WHERE agency = 'OSHA'
-                      AND year IS NOT NULL
-                      AND year >= 2000
-                    GROUP BY year
-                    ORDER BY year
-                """
-                df = pd.read_sql(sql, session.bind)
+                query = session.query(
+                    Violation.year,
+                    func.coalesce(func.sum(Violation.current_penalty), 0).label('total_penalty')
+                ).filter(
+                    Violation.agency == "OSHA",
+                    Violation.year.isnot(None),
+                    Violation.year >= 2000
+                )
+                if state:
+                    query = query.filter(Violation.site_state == state.upper())
+                
+                query = query.group_by(Violation.year).order_by(Violation.year)
+                df = pd.read_sql(query.statement, session.bind)
                 df.columns = ['year', 'total_penalty']
                 # Ensure numeric type before rounding
                 df['total_penalty'] = pd.to_numeric(df['total_penalty'], errors='coerce').round(2)
